@@ -1,0 +1,21 @@
+{
+  "globalTagDefaults" : {
+    "currentState" : "idle"
+  },
+  
+  "animatedParts" : {
+    "parts" : {
+      "rope" : {
+        "properties" : {
+          "centered" : false,
+          "image" : "grapplegun.png:<currentState>",
+          "offset" : [-0.6, -0.5]
+        }
+      }
+    }
+  },
+
+  "sounds" : {
+    "fire" : ["/sfx/gun/grapplegun.ogg"]
+  }
+}
