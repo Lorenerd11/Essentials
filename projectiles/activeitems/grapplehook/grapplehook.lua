@@ -5,6 +5,9 @@ function init()
   self.anchored = true
   self.snapDistance = config.getParameter("snapDistance", 12)
   self.pickupDistance = config.getParameter("pickupDistance", 2)
+  self.breakOnSlipperyCollision = config.getParameter("breakOnSlipperyCollision")
+  
+  self.ropeHook = config.getParameter("ropeHook", false)
   
   self.timeToLive = config.getParameter("timeToLive")
   self.speed = config.getParameter("speed")
@@ -17,9 +20,13 @@ function update(dt)
   if anchored() and self.anchored then
     self.anchored = true
   end
+  if not anchored() and mcontroller.isColliding() then
+    returnToSender()
+  end
 
   if self.ownerId and world.entityExists(self.ownerId) and self.returning and not self.anchored then
     local toTarget = world.distance(world.entityPosition(self.ownerId), mcontroller.position())
+	
 	--sb.logInfo("Distance to owner %s", vec2.mag(toTarget))
     if vec2.mag(toTarget) < self.pickupDistance then
       kill()
@@ -27,6 +34,7 @@ function update(dt)
 	  mcontroller.applyParameters({collisionEnabled=false})
 	  mcontroller.approachVelocity(vec2.mul(vec2.norm(toTarget), self.speed), 500)
     else
+	  mcontroller.applyParameters({collisionEnabled=false})
 	  mcontroller.approachVelocity(vec2.mul(vec2.norm(toTarget), self.speed), 500)
     end
   end
@@ -37,8 +45,14 @@ function anchored()
 end
 
 function returnToSender(ownerId)
+  if self.ropeHook then
+    kill()
+  end
+
+  if ownerId then
+    self.ownerId = ownerId
+  end
   self.anchored = false
-  self.ownerId = ownerId
   self.returning = true
 end
 
