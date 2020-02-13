@@ -1,7 +1,7 @@
 {
   "itemName" : "grapplinghook",
   "price" : 3000,
-  "inventoryIcon" : "grapplehookicon.png:idle",
+  "inventoryIcon" : "grapplehookicon.png",
   "rarity" : "Legendary",
   "maxStack" : 1,
   "description" : "Oh my god, whee! This is so fun!",
