@@ -3,7 +3,6 @@ require "/scripts/vec2.lua"
 function init()
   self.returning = false
   self.anchored = true
-  self.snapDistance = config.getParameter("snapDistance", 12)
   self.pickupDistance = config.getParameter("pickupDistance", 2)
   self.breakOnSlipperyCollision = config.getParameter("breakOnSlipperyCollision")
   
@@ -12,6 +11,9 @@ function init()
   self.timeToLive = config.getParameter("timeToLive")
   self.speed = config.getParameter("speed")
   self.ownerId = projectile.sourceEntity()
+  
+  self.returnTime = 2
+  self.returnTimer = self.returnTime
   
   message.setHandler("returnToSender", returnToSender)
 end
@@ -33,8 +35,14 @@ function update(dt)
     elseif projectile.timeToLive() < self.timeToLive * 0.5 then
 	  mcontroller.applyParameters({collisionEnabled=false})
 	  mcontroller.approachVelocity(vec2.mul(vec2.norm(toTarget), self.speed), 500)
-    else
+    elseif self.returnTimer <= 0 then
 	  mcontroller.applyParameters({collisionEnabled=false})
+	  mcontroller.approachVelocity(vec2.mul(vec2.norm(toTarget), self.speed), 500)
+	elseif self.returnTimer > 0 then
+	  mcontroller.applyParameters({collisionEnabled=true})
+	  self.returnTimer = self.returnTime
+	else
+      self.returnTimer = math.max(0, self.returnTimer - dt)
 	  mcontroller.approachVelocity(vec2.mul(vec2.norm(toTarget), self.speed), 500)
     end
   end
