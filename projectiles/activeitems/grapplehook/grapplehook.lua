@@ -3,7 +3,6 @@ require "/scripts/vec2.lua"
 function init()
   self.returning = false
   self.anchored = true
-  self.snapDistance = config.getParameter("snapDistance", 12)
   self.pickupDistance = config.getParameter("pickupDistance", 2)
   self.breakOnSlipperyCollision = config.getParameter("breakOnSlipperyCollision")
   
@@ -12,6 +11,9 @@ function init()
   self.timeToLive = config.getParameter("timeToLive")
   self.speed = config.getParameter("speed")
   self.ownerId = projectile.sourceEntity()
+  
+  self.returnTime = 2
+  self.returnTimer = self.returnTime
   
   message.setHandler("returnToSender", returnToSender)
 end
@@ -26,6 +28,8 @@ function update(dt)
 
   if self.ownerId and world.entityExists(self.ownerId) and self.returning and not self.anchored then
     local toTarget = world.distance(world.entityPosition(self.ownerId), mcontroller.position())
+	local faceAway = vec2.angle(vec2.mul(toTarget, -1))
+	mcontroller.setRotation(faceAway)
 	
 	--sb.logInfo("Distance to owner %s", vec2.mag(toTarget))
     if vec2.mag(toTarget) < self.pickupDistance then
@@ -33,8 +37,15 @@ function update(dt)
     elseif projectile.timeToLive() < self.timeToLive * 0.5 then
 	  mcontroller.applyParameters({collisionEnabled=false})
 	  mcontroller.approachVelocity(vec2.mul(vec2.norm(toTarget), self.speed), 500)
-    else
+    elseif self.returnTimer <= 0 then
 	  mcontroller.applyParameters({collisionEnabled=false})
+	  mcontroller.approachVelocity(vec2.mul(vec2.norm(toTarget), self.speed), 500)
+	elseif self.returnTimer > 0 then
+	  mcontroller.applyParameters({collisionEnabled=true})
+	  mcontroller.approachVelocity(vec2.mul(vec2.norm(toTarget), self.speed), 500)
+	  self.returnTimer = self.returnTime
+	else
+      self.returnTimer = math.max(0, self.returnTimer - dt)
 	  mcontroller.approachVelocity(vec2.mul(vec2.norm(toTarget), self.speed), 500)
     end
   end
